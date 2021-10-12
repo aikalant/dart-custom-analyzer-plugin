@@ -1,0 +1,18 @@
+name: dart_custom_analyzer_plugin
+description: Library for a custom dart analyzer plugin.
+version: 1.0.0
+repository: https://github.com/aikalant/dart-custom-analyzer-plugin
+publish_to: none
+
+environment:
+  sdk: '>=2.14.0-0 <3.0.0'
+
+dependencies:
+   path: ^1.8.0
+   yaml: ^3.1.0
+   analyzer: '>=2.1.0 <2.4.0'
+   analyzer_plugin: ^0.7.0
+   meta: ^1.7.0
+
+dev_dependencies:
+  lints: ^1.0.0
