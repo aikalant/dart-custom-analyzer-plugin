@@ -18,8 +18,7 @@ class NoMaterialCupertinoImportRule extends Rule {
   String get message => 'Do not use material or cupertino libraries.';
 
   @override
-  String? get correction =>
-      'Use "package:flutter_widgets/flutter_widgets.dart" instead.';
+  String? get correction => "Instead, use 'package:flutter/widgets.dart'";
 
   @override
   AnalysisErrorSeverity get severity => AnalysisErrorSeverity.ERROR;
