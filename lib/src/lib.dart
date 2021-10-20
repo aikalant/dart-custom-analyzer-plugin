@@ -14,7 +14,7 @@ import 'analyzer/options/options.dart';
 Future<Iterable<AnalysisErrorFixes>> analyze(Iterable<String> paths) async {
   final resourceProvider = PhysicalResourceProvider.INSTANCE;
   final contextCollection = AnalysisContextCollectionImpl(
-    includedPaths: paths.map(normalize).toList(),
+    includedPaths: paths.map(canonicalize).toList(),
     resourceProvider: resourceProvider,
     byteStore: _createByteStore(resourceProvider),
   );
