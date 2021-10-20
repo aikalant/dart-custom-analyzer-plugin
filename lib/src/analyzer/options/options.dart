@@ -52,7 +52,11 @@ Set<String> _parseOptions(Map<String, Object> optionsMap) {
         final ruleOptions = entry.value;
         if (ruleOptions is Map<String, Object>) {
           final enabled = ruleOptions['enabled'] ?? true;
-          if (enabled == true) enabledRules.add(ruleID);
+          if (enabled == true) {
+            enabledRules.add(ruleID);
+          } else {
+            enabledRules.remove(ruleID);
+          }
         }
       }
     }
