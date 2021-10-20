@@ -8,8 +8,9 @@ import 'package:analyzer_plugin/protocol/protocol_generated.dart';
 import 'package:path/path.dart';
 
 import 'analyzer/analyzer.dart';
-import 'analyzer/options.dart';
+import 'analyzer/options/options.dart';
 
+/// Paths may contain files or directories
 Future<Iterable<AnalysisErrorFixes>> analyze(Iterable<String> paths) async {
   final resourceProvider = PhysicalResourceProvider.INSTANCE;
   final contextCollection = AnalysisContextCollectionImpl(
@@ -20,31 +21,18 @@ Future<Iterable<AnalysisErrorFixes>> analyze(Iterable<String> paths) async {
 
   final errors = <AnalysisErrorFixes>[];
   for (final context in contextCollection.contexts) {
-    final optionsFile = context.contextRoot.optionsFile;
-    final options = optionsFile?.exists ?? false
-        ? CustomAnalysisOptions.fromAnalysisOptionsFile(optionsFile!)
-        : CustomAnalysisOptions();
-    for (final file in context.contextRoot.analyzedFiles().where(
-          (file) => _filterFile(
-            file,
-            //context.analysisOptions.excludePatterns, (think this is done for us)
-            options,
-          ),
-        )) {
+    final enabledRules = await getRulesFromContext(context);
+    for (final file in context.contextRoot
+        .analyzedFiles()
+        .where((file) => file.endsWith('.dart'))) {
       final resolvedUnit = await context.currentSession.getResolvedUnit(file);
       if (resolvedUnit is ResolvedUnitResult &&
           resolvedUnit.state == ResultState.VALID) {
-        //errors.addAll(analyzeResult(resolvedUnit, options));
-        errors.addAll(analyzeResult(resolvedUnit));
+        errors.addAll(analyzeResult(resolvedUnit, enabledRules));
       }
     }
   }
   return errors;
-}
-
-bool _filterFile(String file, CustomAnalysisOptions options) {
-  return file.endsWith('.dart'); //this is not done for us
-  //TODO optionally create and filter based on custom patterns specified in the optionsFile
 }
 
 /// If the state location can be accessed, return the file byte store,

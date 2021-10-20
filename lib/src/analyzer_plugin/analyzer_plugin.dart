@@ -12,17 +12,19 @@ import 'package:analyzer_plugin/plugin/plugin.dart';
 import 'package:analyzer_plugin/protocol/protocol_generated.dart' as plugin;
 
 import '../analyzer/analyzer.dart';
+import '../analyzer/options/options.dart';
 
 class AnalyzerPlugin extends ServerPlugin {
   AnalyzerPlugin(ResourceProvider provider) : super(provider);
   //static const _analyzer = LintAnalyzer();
 
-  //final _configs = <AnalysisDriverGeneric, LintAnalysisConfig>{};
+  final _configs = <AnalysisDriverGeneric, Set<String>>{};
 
   var _filesFromSetPriorityFilesRequest = <String>[];
 
-  //@override
-  //String get contactInfo => 'https://github.com/dart-code-checker/dart-code-metrics/issues';
+  @override
+  String get contactInfo =>
+      'https://github.com/aikalant/dart-custom-analyzer-plugin/issues';
 
   @override
   List<String> get fileGlobsToAnalyze => const ['*.dart'];
@@ -65,11 +67,11 @@ class AnalyzerPlugin extends ServerPlugin {
     final context = builder.createContext(contextRoot: locator.first)
         as DriverBasedAnalysisContext;
     final dartDriver = context.driver;
-    //final config = _createConfig(dartDriver, rootPath);
+    final rulesList = _configs[dartDriver] = getRulesFromDriver(dartDriver);
 
-    //if (config == null) {
-    //  return dartDriver;
-    //}
+    if (rulesList.isEmpty) {
+      return dartDriver;
+    }
 
     runZonedGuarded(
       () {
@@ -100,7 +102,7 @@ class AnalyzerPlugin extends ServerPlugin {
           (driver.analysisContext?.contextRoot
                   .isAnalyzed(analysisResult.path) ??
               false)) {
-        final fixes = analyzeResult(analysisResult);
+        final fixes = analyzeResult(analysisResult, _configs[driver] ?? {});
 
         channel.sendNotification(
           plugin.AnalysisErrorsParams(
@@ -120,34 +122,6 @@ class AnalyzerPlugin extends ServerPlugin {
       );
     }
   }
-
-  // LintAnalysisConfig? _createConfig(AnalysisDriver driver, String rootPath) {
-  //   final file = driver.analysisContext?.contextRoot.optionsFile;
-  //   if (file != null && file.exists) {
-  //     final options = AnalysisOptions(
-  //       file.path,
-  //       yamlMapToDartMap(
-  //         AnalysisOptionsProvider(driver.sourceFactory).getOptionsFromFile(file),
-  //       ),
-  //     );
-  //     final config = ConfigBuilder.getLintConfigFromOptions(options);
-  //     final lintConfig = ConfigBuilder.getLintAnalysisConfig(
-  //       config,
-  //       options.folderPath ?? rootPath,
-  //       classMetrics: const [],
-  //       functionMetrics: [
-  //         NumberOfParametersMetric(config: config.metrics),
-  //         SourceLinesOfCodeMetric(config: config.metrics),
-  //       ],
-  //     );
-
-  //     _configs[driver] = lintConfig;
-
-  //     return lintConfig;
-  //   }
-
-  //   return null;
-  // }
 
   @override
   Future<plugin.AnalysisSetContextRootsResult> handleAnalysisSetContextRoots(
@@ -183,7 +157,7 @@ class AnalyzerPlugin extends ServerPlugin {
         return plugin.EditGetFixesResult([]);
       }
 
-      final fixes = analyzeResult(analysisResult)
+      final fixes = analyzeResult(analysisResult, _configs[driver] ?? {})
           .where(
             (fix) =>
                 fix.error.location.file == parameters.file &&
@@ -230,7 +204,6 @@ class AnalyzerPlugin extends ServerPlugin {
     for (final file in filesToFullyResolve) {
       final contextRoot = contextRootContaining(file);
       if (contextRoot != null) {
-        // TODO(dkrutskikh): Which driver should we use if there is no context root?
         final driver = driverMap[contextRoot];
         if (driver != null) {
           filesByDriver.putIfAbsent(driver, () => <String>[]).add(file);

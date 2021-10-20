@@ -10,9 +10,9 @@ import '../visitor_mixin.dart';
 
 part 'visitor.dart';
 
-class NoMaterialCupertinoImportRule extends Rule {
+class NoMaterialCupertinoImportsRule extends Rule {
   @override
-  String get id => 'no_material_cupertino_import';
+  String get id => 'no_material_cupertino_imports';
 
   @override
   String get message => 'Do not use material or cupertino libraries.';
