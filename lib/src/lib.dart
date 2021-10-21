@@ -42,13 +42,12 @@ Future<Map<AnalysisContext, List<AnalysisErrorFixes>>> analyze(
       final resolvedUnit = await context.currentSession.getResolvedUnit(file);
       if (resolvedUnit is ResolvedUnitResult &&
           resolvedUnit.state == ResultState.VALID) {
-        final results = List<AnalysisErrorFixes>.unmodifiable(
-          analyzeResult(resolvedUnit, enabledRules),
-        );
-        onContextDone?.call(context, results);
-        errors[context] = results;
+        errors
+            .putIfAbsent(context, () => <AnalysisErrorFixes>[])
+            .addAll(analyzeResult(resolvedUnit, enabledRules));
       }
     }
+    onContextDone?.call(context, errors[context] ?? <AnalysisErrorFixes>[]);
   }
   return errors;
 }
