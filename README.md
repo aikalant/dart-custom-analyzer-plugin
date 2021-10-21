@@ -93,3 +93,6 @@ Don't forget to restart the analyzer server (ctrl + shift + p)
 If you have trouble, try clearing the analysis server plugin cache and then restarting the server:
 - `~/.dartServer/.plugin_manager/` for linux/mac
 - `%LOCALAPPDATA%/.dartServer/.plugin_manager/` for windows
+
+## Sources
+https://github.com/dart-code-checker/dart-code-metrics
