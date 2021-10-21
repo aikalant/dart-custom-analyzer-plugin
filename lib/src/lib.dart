@@ -20,7 +20,7 @@ typedef ContextDoneHook = void Function(
 );
 
 /// Paths may contain files or directories
-Future<Map<AnalysisContext, List<AnalysisErrorFixes>>> analyze(
+Future<Iterable<AnalysisErrorFixes>> analyze(
   Iterable<String> paths,
 ) async {
   final resourceProvider = PhysicalResourceProvider.INSTANCE;
@@ -30,7 +30,7 @@ Future<Map<AnalysisContext, List<AnalysisErrorFixes>>> analyze(
     byteStore: _createByteStore(resourceProvider),
   );
 
-  final errors = <AnalysisContext, List<AnalysisErrorFixes>>{};
+  final errors = <AnalysisErrorFixes>[];
   for (final context in contextCollection.contexts) {
     final enabledRules = await getRulesFromContext(context);
     if (enabledRules.isNotEmpty) {
@@ -40,9 +40,7 @@ Future<Map<AnalysisContext, List<AnalysisErrorFixes>>> analyze(
         final resolvedUnit = await context.currentSession.getResolvedUnit(file);
         if (resolvedUnit is ResolvedUnitResult &&
             resolvedUnit.state == ResultState.VALID) {
-          errors
-              .putIfAbsent(context, () => <AnalysisErrorFixes>[])
-              .addAll(analyzeResult(resolvedUnit, enabledRules));
+          errors.addAll(analyzeResult(resolvedUnit, enabledRules));
         }
       }
     }
