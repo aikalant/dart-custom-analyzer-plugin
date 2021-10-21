@@ -21,10 +21,8 @@ typedef ContextDoneHook = void Function(
 
 /// Paths may contain files or directories
 Future<Map<AnalysisContext, List<AnalysisErrorFixes>>> analyze(
-  Iterable<String> paths, {
-  ContextStartHook? onContextStart,
-  ContextDoneHook? onContextDone,
-}) async {
+  Iterable<String> paths,
+) async {
   final resourceProvider = PhysicalResourceProvider.INSTANCE;
   final contextCollection = AnalysisContextCollectionImpl(
     includedPaths: paths.map(canonicalize).toList(),
@@ -34,20 +32,20 @@ Future<Map<AnalysisContext, List<AnalysisErrorFixes>>> analyze(
 
   final errors = <AnalysisContext, List<AnalysisErrorFixes>>{};
   for (final context in contextCollection.contexts) {
-    onContextStart?.call(context);
     final enabledRules = await getRulesFromContext(context);
-    for (final file in context.contextRoot
-        .analyzedFiles()
-        .where((file) => file.endsWith('.dart'))) {
-      final resolvedUnit = await context.currentSession.getResolvedUnit(file);
-      if (resolvedUnit is ResolvedUnitResult &&
-          resolvedUnit.state == ResultState.VALID) {
-        errors
-            .putIfAbsent(context, () => <AnalysisErrorFixes>[])
-            .addAll(analyzeResult(resolvedUnit, enabledRules));
+    if (enabledRules.isNotEmpty) {
+      for (final file in context.contextRoot
+          .analyzedFiles()
+          .where((file) => file.endsWith('.dart'))) {
+        final resolvedUnit = await context.currentSession.getResolvedUnit(file);
+        if (resolvedUnit is ResolvedUnitResult &&
+            resolvedUnit.state == ResultState.VALID) {
+          errors
+              .putIfAbsent(context, () => <AnalysisErrorFixes>[])
+              .addAll(analyzeResult(resolvedUnit, enabledRules));
+        }
       }
     }
-    onContextDone?.call(context, errors[context] ?? <AnalysisErrorFixes>[]);
   }
   return errors;
 }
