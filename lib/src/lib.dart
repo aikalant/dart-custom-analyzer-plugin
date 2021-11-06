@@ -32,14 +32,13 @@ Future<Iterable<AnalysisErrorFixes>> analyze(
 
   final errors = <AnalysisErrorFixes>[];
   for (final context in contextCollection.contexts) {
-    final enabledRules = await getRulesFromContext(context);
+    final enabledRules = getRulesFromDriver(context.driver);
     if (enabledRules.isNotEmpty) {
       for (final file in context.contextRoot
           .analyzedFiles()
           .where((file) => file.endsWith('.dart'))) {
         final resolvedUnit = await context.currentSession.getResolvedUnit(file);
-        if (resolvedUnit is ResolvedUnitResult &&
-            resolvedUnit.state == ResultState.VALID) {
+        if (resolvedUnit is ResolvedUnitResult) {
           errors.addAll(analyzeResult(resolvedUnit, enabledRules));
         }
       }
