@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
 import 'package:analyzer/dart/analysis/context_builder.dart';
@@ -18,7 +20,7 @@ class AnalyzerPlugin extends ServerPlugin {
   AnalyzerPlugin(ResourceProvider provider) : super(provider);
   //static const _analyzer = LintAnalyzer();
 
-  final _configs = <AnalysisDriverGeneric, Set<String>>{};
+  final _configs = <AnalysisDriverGeneric, Map<String, RuleConfig>>{};
 
   var _filesFromSetPriorityFilesRequest = <String>[];
 
@@ -67,7 +69,8 @@ class AnalyzerPlugin extends ServerPlugin {
     final context = builder.createContext(contextRoot: locator.first)
         as DriverBasedAnalysisContext;
     final dartDriver = context.driver;
-    final rulesList = _configs[dartDriver] = getRulesFromDriver(dartDriver);
+    final rulesList = _configs[dartDriver] =
+        getOptionsFromDriver(dartDriver, context.contextRoot.root);
 
     if (rulesList.isEmpty) {
       return dartDriver;
