@@ -7,16 +7,27 @@ Heavily inspired by (and often borrowed from) dart code metrics https://github.c
 Whether this repo is used as a plugin or a library, files that it analyzes must be `.dart` files within a dart package containing an `analysis_options.yaml` file.
 
 Include the following entry in the `analysis_options.yaml` file(s) with your specified set of rules. 
-Rules may be simple strings, or maps with rule options (the only current option is the `enabled` boolean) 
+Rules may be simple strings, or maps with rule options.
 
 ###### target packages' `analysis_options.yaml`
 ```
 custom_linter:
-  - <rule id>:
-      enabled: false
-  - <rule id>
-  - ...
+  rules:
+    - <rule id>
+    - <rule id>:
+        enabled: false
+        exclude:
+         - /test/**
+         - /lib/generated**
+        <rule specific option>: <val>
+    - <rule id>
+    - ...
 ```
+
+Each rule may have its own options, but all rules may include the following optional keys:
+- `enabled` - controls whether the rule is run or not.
+- `exclude` - list if file paths to exclude from analysis.
+   - ex: `/test/**`
 
 ### Library
 

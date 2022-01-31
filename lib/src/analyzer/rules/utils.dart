@@ -18,7 +18,7 @@ AnalysisError generateError({
       rule.message,
       rule.id,
       correction: rule.correction,
-      url: url,
+      url: url == null ? null : '$url#${rule.id}',
       hasFix: hasFix,
     );
 

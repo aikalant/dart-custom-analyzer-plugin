@@ -14,7 +14,7 @@ class NoBareStrings extends Rule {
   String get message => 'Avoid string literals.';
 
   @override
-  String? get correction => 'Use internationalization: "S.of(context).XXX"';
+  String? get correction => 'Use internationalization if possible.';
 
   @override
   AnalysisErrorSeverity get severity => AnalysisErrorSeverity.WARNING;

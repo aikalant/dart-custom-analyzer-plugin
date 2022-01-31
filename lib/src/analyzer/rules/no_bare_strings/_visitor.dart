@@ -60,21 +60,21 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
   @override
   void visitStringInterpolation(StringInterpolation node) {
     super.visitStringInterpolation(node);
-    _check(node);
+    _check(
+      node,
+      node.elements.whereType<InterpolationString>().map((e) => e.value).join(),
+    );
   }
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
     super.visitSimpleStringLiteral(node);
-    _check(node);
+    _check(node, node.value);
   }
 
-  void _check(AstNode node) {
+  void _check(AstNode node, String stringValue) {
     if (node.thisOrAncestorMatching(_isAllowedAncestor) == null &&
-        _containsAlphabeticChars(
-          node.toString(),
-          stripInterpolation: node is StringInterpolation,
-        )) {
+        _containsAlphabeticChars(stringValue)) {
       errors.add(
         AnalysisErrorFixes(
           generateError(
@@ -107,35 +107,27 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
       return _allowedConstructorInvocations?.any(constructorName.endsWith) ??
           false;
     } else if (node is MethodInvocation) {
-      final functionName = node.methodName.name;
-      return _allowedMethodInvocations?.any(functionName.equals) ?? false;
+      final methodName = node.methodName.name;
+      return _allowedMethodInvocations?.contains(methodName) ?? false;
     } else if (node is MethodDeclaration) {
       final methodName = node.name.name;
-      return _allowedMethodBodies?.any(methodName.equals) ?? false;
+      return _allowedMethodBodies?.contains(methodName) ?? false;
     } else if (node is FunctionDeclaration) {
       final functionName = node.name.name;
-      return _allowedMethodBodies?.any(functionName.equals) ?? false;
+      return _allowedMethodBodies?.contains(functionName) ?? false;
     } else if (node is ClassDeclaration) {
       final className = node.name.name;
-      return _allowedClasses?.any(className.equals) ?? false;
+      return _allowedClasses?.contains(className) ?? false;
     }
     return false;
   }
 
-  static final _interpolationRegex = RegExp(r'(\$\S+)|(\$\{.+?\})');
   static final _alphabeticalRegex = RegExp(r'\p{L}+', unicode: true);
 
-  bool _containsAlphabeticChars(
-    String s, {
-    bool stripInterpolation = false,
-  }) {
-    var str = stripInterpolation ? s.replaceAll(_interpolationRegex, '') : s;
+  bool _containsAlphabeticChars(String stringValue) {
+    var str = stringValue;
     _allowedStrings
         ?.forEach((allowedString) => str = str.replaceAll(allowedString, ''));
     return str.contains(_alphabeticalRegex);
   }
-}
-
-extension _StringExt on String {
-  bool equals(String other) => this == other;
 }
