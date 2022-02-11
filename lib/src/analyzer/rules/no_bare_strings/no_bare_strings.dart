@@ -6,18 +6,18 @@ import '../rule_base.dart';
 import '../visitor_mixin.dart';
 import '_visitor.dart';
 
-class NoMaterialCupertinoImportsRule extends Rule {
+class NoBareStrings extends Rule {
   @override
-  String get id => 'no_material_cupertino_imports';
+  String get id => 'no_bare_strings';
 
   @override
-  String get message => 'Do not use material or cupertino libraries.';
+  String get message => 'Avoid string literals.';
 
   @override
-  String? get correction => "Instead, use 'package:flutter/widgets.dart'";
+  String? get correction => 'Use internationalization if possible.';
 
   @override
-  AnalysisErrorSeverity get severity => AnalysisErrorSeverity.ERROR;
+  AnalysisErrorSeverity get severity => AnalysisErrorSeverity.WARNING;
 
   @override
   VisitorMixin getVisitor(

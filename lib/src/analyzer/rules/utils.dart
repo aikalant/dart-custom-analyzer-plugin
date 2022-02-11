@@ -9,6 +9,7 @@ AnalysisError generateError({
   required ResolvedUnitResult result,
   required SyntacticEntity node,
   required bool hasFix,
+  String? url,
 }) =>
     AnalysisError(
       rule.severity,
@@ -17,7 +18,7 @@ AnalysisError generateError({
       rule.message,
       rule.id,
       correction: rule.correction,
-      //url: 'www.google.com',
+      url: url == null ? null : '$url#${rule.id}',
       hasFix: hasFix,
     );
 

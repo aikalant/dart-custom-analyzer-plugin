@@ -21,8 +21,11 @@ typedef ContextDoneHook = void Function(
 
 /// Paths may contain files or directories
 Future<Iterable<AnalysisErrorFixes>> analyze(
-  Iterable<String> paths,
-) async {
+  Iterable<String> paths, {
+  List<String>? ruleWhiteList,
+  List<String>? ruleBlackList,
+}) async {
+  assert(ruleWhiteList == null || ruleBlackList == null);
   final resourceProvider = PhysicalResourceProvider.INSTANCE;
   final contextCollection = AnalysisContextCollectionImpl(
     includedPaths: paths.map(canonicalize).toList(),
@@ -32,11 +35,17 @@ Future<Iterable<AnalysisErrorFixes>> analyze(
 
   final errors = <AnalysisErrorFixes>[];
   for (final context in contextCollection.contexts) {
-    final enabledRules = getRulesFromDriver(context.driver);
+    final enabledRules = getOptionsFromDriver(
+      context.driver,
+      context.contextRoot.root,
+      ruleWhiteList,
+      ruleBlackList,
+    );
     if (enabledRules.isNotEmpty) {
       for (final file in context.contextRoot
           .analyzedFiles()
-          .where((file) => file.endsWith('.dart'))) {
+          .where((file) => file.endsWith('.dart'))
+          .where((file) => !file.endsWith('.g.dart'))) {
         final resolvedUnit = await context.currentSession.getResolvedUnit(file);
         if (resolvedUnit is ResolvedUnitResult) {
           errors.addAll(analyzeResult(resolvedUnit, enabledRules));
