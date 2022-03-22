@@ -94,9 +94,7 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
     // cant use switch(node.runtimeType) because node is actually
     // "xxxImpl" types, which are internal to the analyzer package
     // so we have to use this if/else statement
-    if (node is Directive ||
-        node is AssertStatement ||
-        node is ThrowExpression) {
+    if (node is Directive || node is Assertion || node is ThrowExpression) {
       return true;
     } else if (node is InstanceCreationExpression) {
       //need to strip generic stuff
