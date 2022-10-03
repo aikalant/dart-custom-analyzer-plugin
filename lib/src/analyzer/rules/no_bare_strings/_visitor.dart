@@ -73,7 +73,10 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
   }
 
   void _check(AstNode node, String stringValue) {
-    if (node.thisOrAncestorMatching(_isAllowedAncestor) == null &&
+    if (node.thisOrAncestorMatching(
+              (ancestorNode) => _isAllowedAncestor(node, ancestorNode),
+            ) ==
+            null &&
         _containsAlphabeticChars(stringValue)) {
       errors.add(
         AnalysisErrorFixes(
@@ -90,7 +93,7 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
     }
   }
 
-  bool _isAllowedAncestor(AstNode node) {
+  bool _isAllowedAncestor(AstNode stringNode, AstNode node) {
     // cant use switch(node.runtimeType) because node is actually
     // "xxxImpl" types, which are internal to the analyzer package
     // so we have to use this if/else statement
@@ -106,7 +109,13 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
           false;
     } else if (node is MethodInvocation) {
       final methodName = node.methodName.name;
-      return _allowedMethodInvocations?.contains(methodName) ?? false;
+      return (_allowedMethodInvocations?.contains(methodName) ?? false) &&
+          //make sure the string is a child of the argument list,
+          //not the object calling the method
+          stringNode.thisOrAncestorMatching(
+                (ancestorNode) => ancestorNode == node.argumentList,
+              ) !=
+              null;
     } else if (node is MethodDeclaration) {
       final methodName = node.name.name;
       return _allowedMethodBodies?.contains(methodName) ?? false;
