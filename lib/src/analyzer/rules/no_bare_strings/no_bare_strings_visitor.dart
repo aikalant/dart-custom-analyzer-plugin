@@ -52,7 +52,6 @@ class NoBareStringsVisitor extends SimpleRuleVisitor {
 
   @override
   void visitStringInterpolation(StringInterpolation node) {
-    super.visitStringInterpolation(node);
     _check(
       node,
       node.elements.whereType<InterpolationString>().map((e) => e.value).join(),
@@ -61,7 +60,6 @@ class NoBareStringsVisitor extends SimpleRuleVisitor {
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
-    super.visitSimpleStringLiteral(node);
     _check(node, node.value);
   }
 

@@ -32,21 +32,6 @@ class TestSimpleRuleVisitor extends SimpleRuleVisitor {
   }
 }
 
-class TestRuleVisitor extends TestSimpleRuleVisitor
-    with NoMaterialCupertinoImportsMixin {
-  TestRuleVisitor({
-    required super.rule,
-    required super.result,
-    required super.config,
-    required super.onVisitImportDirective,
-  });
-
-  @override
-  void visitImportDirective(ImportDirective node) {
-    analyzeImportDirective(node);
-  }
-}
-
 ErrorGenerator testGenerateError(AnalysisError error) => ({
       required Rule rule,
       required ResolvedUnitResult result,
@@ -102,26 +87,6 @@ void main() {
         importUri = MockStringLiteral();
       });
 
-      test('calls super', () {
-        final node = MockImportDirective();
-
-        when(() => importUri.toSource()).thenReturn(goodImportUri);
-        when(() => node.uri).thenReturn(importUri);
-
-        var called = false;
-
-        // Use the test rule visitor only to verify that super() is called.
-        // All other tests can use the actual rule.
-        TestRuleVisitor(
-          rule: rule,
-          result: result,
-          config: config,
-          onVisitImportDirective: () => called = true,
-        ).visitImportDirective(node);
-
-        expect(called, isTrue);
-      });
-
       test('does nothing if no import uri', () {
         when(() => importUri.toSource()).thenReturn('');
         when(() => node.uri).thenReturn(importUri);
@@ -156,7 +121,7 @@ void main() {
 
       test('triggers warning for material imports', () {
         when(() => importUri.toSource())
-            .thenReturn(NoMaterialCupertinoImportsMixin.material);
+            .thenReturn(NoMaterialCupertinoImportsVisitor.material);
         when(() => importUri.offset).thenReturn(0);
         when(() => importUri.length).thenReturn(0);
         when(() => node.uri).thenReturn(importUri);
