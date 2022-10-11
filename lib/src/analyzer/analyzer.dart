@@ -1,7 +1,7 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer_plugin/protocol/protocol_generated.dart';
-import 'options/options.dart';
 
+import 'options/options.dart';
 import 'rules/rule_list.dart';
 import 'suppression.dart';
 

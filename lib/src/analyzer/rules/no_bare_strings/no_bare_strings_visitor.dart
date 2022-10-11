@@ -1,60 +1,53 @@
-import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer_plugin/protocol/protocol_generated.dart';
 
 import '../../options/options.dart';
-import '../rule_base.dart';
-import '../utils.dart';
-import '../visitor_mixin.dart';
+import '../../rule/rule_visitor.dart';
+import '../../rule/utils.dart';
 
-class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
-  Visitor(
-    this.rule,
-    this.result,
-    RuleConfig options,
-  ) {
-    _parseConfig(options);
+class NoBareStringsVisitor extends SimpleRuleVisitor {
+  NoBareStringsVisitor({
+    required super.rule,
+    required super.result,
+    required super.config,
+  }) {
+    _parseConfig(config);
   }
 
-  @override
-  final Rule rule;
-  @override
-  final ResolvedUnitResult result;
-  late final String? url;
-  late final Set<String>? _allowedConstructorInvocations;
-  late final Set<String>? _allowedMethodInvocations;
-  late final Set<String>? _allowedClasses;
-  late final Set<String>? _allowedMethodBodies;
-  late final Set<String>? _allowedStrings;
+  static final alphabeticalRegex = RegExp(r'\p{L}+', unicode: true);
+
+  late final Set<String> _allowedConstructorInvocations;
+  late final Set<String> _allowedMethodInvocations;
+  late final Set<String> _allowedClasses;
+  late final Set<String> _allowedMethodBodies;
+  late final Set<String> _allowedStrings;
 
   void _parseConfig(RuleConfig config) {
-    url = config.url;
     final allowedConstructorsList =
         config.options['allowed_constructor_invocations'];
     _allowedConstructorInvocations = allowedConstructorsList is List<Object>
         ? allowedConstructorsList.whereType<String>().toSet()
-        : null;
+        : const {};
 
     final allowedFunctionsList = config.options['allowed_method_invocations'];
     _allowedMethodInvocations = allowedFunctionsList is List<Object>
         ? allowedFunctionsList.whereType<String>().toSet()
-        : null;
+        : const {};
 
     final allowedClassesList = config.options['allowed_classes'];
     _allowedClasses = allowedClassesList is List<Object>
         ? allowedClassesList.whereType<String>().toSet()
-        : null;
+        : const {};
 
     final allowedMethodBodiesList = config.options['allowed_method_bodies'];
     _allowedMethodBodies = allowedMethodBodiesList is List<Object>
         ? allowedMethodBodiesList.whereType<String>().toSet()
-        : null;
+        : const {};
 
     final allowedStringsList = config.options['allowed_strings'];
     _allowedStrings = allowedStringsList is List<Object>
         ? allowedStringsList.whereType<String>().toSet()
-        : null;
+        : const {};
   }
 
   @override
@@ -85,7 +78,7 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
             result: result,
             node: node,
             hasFix: false,
-            url: url,
+            documentationUrl: documentationUrl,
           ),
           //fixes: [],
         ),
@@ -105,11 +98,10 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
       final constructor = node.constructorName.name?.name;
       final constructorName =
           constructor == null ? typeName : '$typeName.$constructor';
-      return _allowedConstructorInvocations?.any(constructorName.endsWith) ??
-          false;
+      return _allowedConstructorInvocations.any(constructorName.endsWith);
     } else if (node is MethodInvocation) {
       final methodName = node.methodName.name;
-      return (_allowedMethodInvocations?.contains(methodName) ?? false) &&
+      return (_allowedMethodInvocations.contains(methodName)) &&
           //make sure the string is a child of the argument list,
           //not the object calling the method
           stringNode.thisOrAncestorMatching(
@@ -118,23 +110,21 @@ class Visitor extends RecursiveAstVisitor<void> with VisitorMixin {
               null;
     } else if (node is MethodDeclaration) {
       final methodName = node.name.name;
-      return _allowedMethodBodies?.contains(methodName) ?? false;
+      return _allowedMethodBodies.contains(methodName);
     } else if (node is FunctionDeclaration) {
       final functionName = node.name.name;
-      return _allowedMethodBodies?.contains(functionName) ?? false;
+      return _allowedMethodBodies.contains(functionName);
     } else if (node is ClassDeclaration) {
       final className = node.name.name;
-      return _allowedClasses?.contains(className) ?? false;
+      return _allowedClasses.contains(className);
     }
     return false;
   }
 
-  static final _alphabeticalRegex = RegExp(r'\p{L}+', unicode: true);
-
   bool _containsAlphabeticChars(String stringValue) {
     var str = stringValue;
     _allowedStrings
-        ?.forEach((allowedString) => str = str.replaceAll(allowedString, ''));
-    return str.contains(_alphabeticalRegex);
+        .forEach((allowedString) => str = str.replaceAll(allowedString, ''));
+    return str.contains(alphabeticalRegex);
   }
 }
