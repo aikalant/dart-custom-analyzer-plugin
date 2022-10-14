@@ -137,6 +137,28 @@ void main() {
 
         expect(visitor.errors, isNotEmpty);
         expect(visitor.errors.first.error, same(error));
+        expect(visitor.errors.first.fixes.first.change.edits, isNotEmpty);
+      });
+
+      test('triggers warning for cupertino imports', () {
+        when(() => importUri.toSource())
+            .thenReturn(NoMaterialCupertinoImportsVisitor.cupertino);
+        when(() => importUri.offset).thenReturn(0);
+        when(() => importUri.length).thenReturn(0);
+        when(() => node.uri).thenReturn(importUri);
+        when(() => result.path).thenReturn('file.dart');
+
+        generateError = testGenerateError(error);
+
+        final visitor = NoMaterialCupertinoImportsVisitor(
+          rule: rule,
+          result: result,
+          config: config,
+        )..visitImportDirective(node);
+
+        expect(visitor.errors, isNotEmpty);
+        expect(visitor.errors.first.error, same(error));
+        expect(visitor.errors.first.fixes.first.change.edits, isNotEmpty);
       });
     });
   });
