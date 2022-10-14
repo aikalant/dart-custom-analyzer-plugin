@@ -110,7 +110,7 @@ class RuleConfig {
 
   /// {@template documentation_url}
   /// Optional path to a markdown file describing the rule. The markdown file
-  /// must contain a heading with the same name as the rule id.
+  /// should contain a heading with the same name as the rule id.
   /// {@endtemplate}
   String? documentationUrl;
 

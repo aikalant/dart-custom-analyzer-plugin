@@ -23,7 +23,7 @@ class NoMaterialCupertinoImportsVisitor extends SimpleRuleVisitor {
     final importsMaterial = uri.contains(material);
     final importsCupertino = uri.contains(cupertino);
     var fix = uri.replaceAll(material, widgets);
-    fix = fix.replaceAll(material, widgets);
+    fix = fix.replaceAll(cupertino, widgets);
 
     if (importsMaterial || importsCupertino) {
       errors.add(
