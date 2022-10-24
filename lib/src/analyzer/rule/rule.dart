@@ -21,7 +21,7 @@ abstract class Rule {
   @nonVirtual
   AnalysisErrorType get type => AnalysisErrorType.LINT;
 
-  SimpleRuleVisitor getVisitor(
+  RuleVisitor getVisitor(
     ResolvedUnitResult result,
     RuleConfig config,
   );

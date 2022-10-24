@@ -1,36 +1,35 @@
 // ignore_for_file: implementation_imports
+import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/src/analysis_options/analysis_options_provider.dart';
-import 'package:analyzer/src/dart/analysis/driver.dart';
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as p;
 
 import 'yaml_utils.dart';
 
-Map<String, RuleConfig> getOptionsFromDriver(
-  AnalysisDriver driver,
-  Folder root, [
+Map<String, RuleConfig> getOptionsFromDriver({
+  required AnalysisContext? context,
+  required AnalysisOptionsProvider optionsProvider,
+  required Folder root,
   List<String>? ruleWhiteList,
   List<String>? ruleBlackList,
-]) {
-  final optionsFile = driver.analysisContext?.contextRoot.optionsFile;
-  if (optionsFile != null && optionsFile.exists) {
-    final optionsMap = yamlMapToDartMap(
-      AnalysisOptionsProvider(driver.sourceFactory)
-          .getOptionsFromFile(optionsFile),
-    );
+}) {
+  final optionsFile = context?.contextRoot.optionsFile;
 
-    final options = _parseOptions(optionsMap, root)
-      ..removeWhere((key, value) => !value.enabled);
-    if (ruleBlackList != null) {
-      options.removeWhere((key, value) => ruleBlackList.contains(key));
-    }
-    if (ruleWhiteList != null) {
-      options.removeWhere((key, value) => !ruleWhiteList.contains(key));
-    }
-    return options;
+  if (optionsFile == null || !optionsFile.exists) {
+    return {};
   }
-  return {};
+  final optionsMap =
+      optionsProvider.getOptionsFromFile(optionsFile).toDartMap();
+  final options = _parseOptions(optionsMap, root)
+    ..removeWhere((key, value) => !value.enabled);
+  if (ruleBlackList != null) {
+    options.removeWhere((key, value) => ruleBlackList.contains(key));
+  }
+  if (ruleWhiteList != null) {
+    options.removeWhere((key, value) => !ruleWhiteList.contains(key));
+  }
+  return options;
 }
 
 Map<String, RuleConfig> _parseOptions(

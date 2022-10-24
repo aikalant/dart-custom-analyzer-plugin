@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, implementation_imports
 
 import 'dart:async';
 
@@ -6,9 +6,8 @@ import 'package:analyzer/dart/analysis/context_builder.dart';
 import 'package:analyzer/dart/analysis/context_locator.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/file_system/file_system.dart';
-// ignore: implementation_imports
+import 'package:analyzer/src/analysis_options/analysis_options_provider.dart';
 import 'package:analyzer/src/dart/analysis/driver.dart';
-// ignore: implementation_imports
 import 'package:analyzer/src/dart/analysis/driver_based_analysis_context.dart';
 import 'package:analyzer_plugin/plugin/plugin.dart';
 import 'package:analyzer_plugin/protocol/protocol_generated.dart' as plugin;
@@ -69,8 +68,11 @@ class AnalyzerPlugin extends ServerPlugin {
     final context = builder.createContext(contextRoot: locator.first)
         as DriverBasedAnalysisContext;
     final dartDriver = context.driver;
-    final rulesList = _configs[dartDriver] =
-        getOptionsFromDriver(dartDriver, context.contextRoot.root);
+    final rulesList = _configs[dartDriver] = getOptionsFromDriver(
+      context: dartDriver.analysisContext,
+      optionsProvider: AnalysisOptionsProvider(dartDriver.sourceFactory),
+      root: context.contextRoot.root,
+    );
 
     if (rulesList.isEmpty) {
       return dartDriver;

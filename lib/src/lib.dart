@@ -2,6 +2,7 @@
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:analyzer/src/analysis_options/analysis_options_provider.dart';
 import 'package:analyzer/src/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/src/dart/analysis/byte_store.dart';
 import 'package:analyzer/src/dart/analysis/file_byte_store.dart';
@@ -36,10 +37,11 @@ Future<Iterable<AnalysisErrorFixes>> analyze(
   final errors = <AnalysisErrorFixes>[];
   for (final context in contextCollection.contexts) {
     final enabledRules = getOptionsFromDriver(
-      context.driver,
-      context.contextRoot.root,
-      ruleWhiteList,
-      ruleBlackList,
+      context: context.driver.analysisContext,
+      optionsProvider: AnalysisOptionsProvider(context.driver.sourceFactory),
+      root: context.contextRoot.root,
+      ruleWhiteList: ruleWhiteList,
+      ruleBlackList: ruleBlackList,
     );
     if (enabledRules.isNotEmpty) {
       for (final file in context.contextRoot

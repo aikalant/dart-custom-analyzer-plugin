@@ -1,6 +1,5 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer_plugin/protocol/protocol_common.dart';
 import 'package:dart_custom_analyzer_plugin/src/analyzer/options/options.dart';
 import 'package:dart_custom_analyzer_plugin/src/analyzer/rule/rule.dart';
@@ -8,38 +7,7 @@ import 'package:dart_custom_analyzer_plugin/src/analyzer/rules/no_material_cuper
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockResult extends Mock implements ResolvedUnitResult {}
-
-class MockRule extends Mock implements Rule {}
-
-class MockImportDirective extends Mock implements ImportDirective {}
-
-class MockStringLiteral extends Mock implements StringLiteral {}
-
-class TestSimpleRuleVisitor extends SimpleRuleVisitor {
-  TestSimpleRuleVisitor({
-    required super.rule,
-    required super.result,
-    required super.config,
-    required this.onVisitImportDirective,
-  });
-
-  final void Function() onVisitImportDirective;
-
-  @override
-  void visitImportDirective(ImportDirective node) {
-    onVisitImportDirective();
-  }
-}
-
-ErrorGenerator testGenerateError(AnalysisError error) => ({
-      required Rule rule,
-      required ResolvedUnitResult result,
-      required SyntacticEntity node,
-      required bool hasFix,
-      String? documentationUrl,
-    }) =>
-        error;
+import '../../../../test_utils.dart';
 
 void main() {
   group('NoMaterialCupertinoImportsVisitor', () {
@@ -113,11 +81,7 @@ void main() {
         expect(visitor.errors, isEmpty);
       });
 
-      group('error production', () {
-        tearDownAll(() {
-          generateError = defaultGenerateError;
-        });
-      });
+      tearDownAll(() => generateError = defaultGenerateError);
 
       test('triggers warning for material imports', () {
         when(() => importUri.toSource())

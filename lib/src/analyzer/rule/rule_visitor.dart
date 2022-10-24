@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer_plugin/protocol/protocol_generated.dart';
 
@@ -7,7 +8,7 @@ import 'rule.dart';
 
 /// Interface for a rule visitor. Use an implementation of this interface as
 /// the superclass for a custom rule visitor.
-abstract class RuleVisitor {
+abstract class RuleVisitor implements AstVisitor<dynamic> {
   /// Rule definition which provides a visitor, id, help text, etc.
   Rule get rule;
 
@@ -27,10 +28,10 @@ abstract class RuleVisitor {
 
   /// Path to the file being analyzed, as determined by the resolved AST
   /// [result]. Use this as the file path for automatic fixes.
-  String get fileUrl => Uri.file(result.path).toFilePath();
+  String get fileUrl;
 
   /// {@macro documentation_url}
-  String? get documentationUrl => config.documentationUrl;
+  String? get documentationUrl;
 }
 
 /// {@template rule_visitor}
