@@ -19,7 +19,7 @@ class NoBareStrings extends Rule {
   AnalysisErrorSeverity get severity => AnalysisErrorSeverity.WARNING;
 
   @override
-  SimpleRuleVisitor getVisitor(
+  RuleVisitor getVisitor(
     ResolvedUnitResult result,
     RuleConfig config,
   ) =>

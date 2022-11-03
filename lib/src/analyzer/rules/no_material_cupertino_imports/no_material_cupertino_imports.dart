@@ -19,7 +19,7 @@ class NoMaterialCupertinoImportsRule extends Rule {
   AnalysisErrorSeverity get severity => AnalysisErrorSeverity.ERROR;
 
   @override
-  SimpleRuleVisitor getVisitor(
+  RuleVisitor getVisitor(
     ResolvedUnitResult result,
     RuleConfig config,
   ) =>

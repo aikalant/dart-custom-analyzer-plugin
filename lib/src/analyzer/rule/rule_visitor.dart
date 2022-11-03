@@ -6,8 +6,10 @@ import 'package:analyzer_plugin/protocol/protocol_generated.dart';
 import '../options/options.dart';
 import 'rule.dart';
 
-/// Interface for a rule visitor. Use an implementation of this interface as
-/// the superclass for a custom rule visitor.
+/// {@template rule_visitor}
+/// Base class for a rule visitor. Extend one of the subclasses when
+/// implementing a rule visitor.
+/// {@endtemplate}
 abstract class RuleVisitor implements AstVisitor<dynamic> {
   /// Rule definition which provides a visitor, id, help text, etc.
   Rule get rule;
@@ -34,13 +36,26 @@ abstract class RuleVisitor implements AstVisitor<dynamic> {
   String? get documentationUrl;
 }
 
-/// {@template rule_visitor}
-/// Default rule visitor superclass that inherits [SimpleAstVisitor].
-/// Most rules (if not all) will extend this class to produce analysis warnings
-/// and errors.
+mixin RuleVisitorImplementation implements RuleVisitor {
+  @override
+  final errors = <AnalysisErrorFixes>[];
+
+  @override
+  String get fileUrl => Uri.file(result.path).toFilePath();
+
+  @override
+  String? get documentationUrl => config.documentationUrl;
+}
+
+/// {@template simple_rule_visitor}
+/// A rule visitor that inherits [SimpleAstVisitor]. Note: this does not
+/// recursively visit child nodes. Use this when you need to override all
+/// nodes that will be visited, or only care about top level nodes (like
+/// import statements).
 /// {@endtemplate}
-class SimpleRuleVisitor extends SimpleAstVisitor<void> implements RuleVisitor {
-  /// {@macro rule_visitor}
+class SimpleRuleVisitor extends SimpleAstVisitor<void>
+    with RuleVisitorImplementation {
+  /// {@macro simple_rule_visitor}
   SimpleRuleVisitor({
     required this.rule,
     required this.result,
@@ -55,13 +70,27 @@ class SimpleRuleVisitor extends SimpleAstVisitor<void> implements RuleVisitor {
 
   @override
   final ResolvedUnitResult result;
+}
+
+/// {@template recursive_rule_visitor}
+/// Rule visitor that recursively visits all children. Use this when you need
+/// to visit the entire AST or a nested subtree.
+/// {@endtemplate}
+class RecursiveRuleVisitor extends RecursiveAstVisitor<void>
+    with RuleVisitorImplementation {
+  /// {@macro recursive_rule_visitor}
+  RecursiveRuleVisitor({
+    required this.rule,
+    required this.result,
+    required this.config,
+  });
 
   @override
-  final errors = <AnalysisErrorFixes>[];
+  final Rule rule;
 
   @override
-  String get fileUrl => Uri.file(result.path).toFilePath();
+  final RuleConfig config;
 
   @override
-  String? get documentationUrl => config.documentationUrl;
+  final ResolvedUnitResult result;
 }

@@ -6,7 +6,7 @@ import '../../options/options.dart';
 import '../../rule/rule_visitor.dart';
 import '../../rule/utils.dart';
 
-class NoBareStringsVisitor extends SimpleRuleVisitor {
+class NoBareStringsVisitor extends RecursiveRuleVisitor {
   NoBareStringsVisitor({
     required super.rule,
     required super.result,
