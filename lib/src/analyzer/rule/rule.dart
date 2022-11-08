@@ -4,7 +4,10 @@ import 'package:analyzer_plugin/protocol/protocol_generated.dart';
 import 'package:meta/meta.dart';
 
 import '../options/options.dart';
-import 'visitor_mixin.dart';
+import 'rule_visitor.dart';
+
+export 'rule_visitor.dart';
+export 'utils.dart';
 
 abstract class Rule {
   String get id;
@@ -18,9 +21,9 @@ abstract class Rule {
   @nonVirtual
   AnalysisErrorType get type => AnalysisErrorType.LINT;
 
-  VisitorMixin getVisitor(
+  RuleVisitor getVisitor(
     ResolvedUnitResult result,
-    RuleConfig options,
+    RuleConfig config,
   );
 
   @nonVirtual

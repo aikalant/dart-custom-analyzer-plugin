@@ -2,9 +2,8 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer_plugin/protocol/protocol_common.dart';
 
 import '../../options/options.dart';
-import '../rule_base.dart';
-import '../visitor_mixin.dart';
-import '_visitor.dart';
+import '../../rule/rule.dart';
+import 'no_bare_strings_visitor.dart';
 
 class NoBareStrings extends Rule {
   @override
@@ -20,9 +19,9 @@ class NoBareStrings extends Rule {
   AnalysisErrorSeverity get severity => AnalysisErrorSeverity.WARNING;
 
   @override
-  VisitorMixin getVisitor(
+  RuleVisitor getVisitor(
     ResolvedUnitResult result,
-    RuleConfig options,
+    RuleConfig config,
   ) =>
-      Visitor(this, result, options);
+      NoBareStringsVisitor(rule: this, result: result, config: config);
 }
