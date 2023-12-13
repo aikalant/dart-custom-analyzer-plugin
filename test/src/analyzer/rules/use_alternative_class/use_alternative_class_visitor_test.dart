@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer_plugin/protocol/protocol_common.dart';
 import 'package:dart_custom_analyzer_plugin/src/analyzer/options/options.dart';
@@ -78,20 +76,21 @@ void main() {
       test('does not add error for class in allowed list ', () {
         final constructorName = _DisallowedMockConstructorName();
         final config = RuleConfig()
-          ..options = <String, Object>{
-            UseAlternativeClassVisitor.alternativeKey: 
-              UnmodifiableMapView(<String, String>{disallowedClassName: 'AlternativeClass'}),
-            UseAlternativeClassVisitor.allowedClassesKey: [disallowedClassName],
+          ..options = {
+            UseAlternativeClassVisitor.alternativeKey: {
+              disallowedClassName: 'AlternativeClass'
+            },
           };
 
         when(() => constructorName.name).thenReturn(null);
         generateError = testGenerateError(error);
 
-        final visitor = createVisitor(config)..visitConstructorName(constructorName);
+        final visitor = createVisitor(config)
+          ..visitConstructorName(constructorName);
 
         expect(visitor.errors, isEmpty);
       });
-      
+
       test('adds error for disallowed class', () {
         final constructorName = _DisallowedMockConstructorName();
 
@@ -121,8 +120,10 @@ void main() {
 }
 
 UseAlternativeClassVisitor createVisitor([RuleConfig? config]) {
-  config ??= RuleConfig()..options[UseAlternativeClassVisitor.alternativeKey] =
-    UnmodifiableMapView(<String, String>{disallowedClassName: 'AlternativeClass'});
+  config ??= RuleConfig()
+    ..options[UseAlternativeClassVisitor.alternativeKey] = {
+      disallowedClassName: 'AlternativeClass'
+    };
   final rule = MockRule();
   final result = MockResult();
 
